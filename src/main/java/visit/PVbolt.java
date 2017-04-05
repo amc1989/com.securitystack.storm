@@ -70,24 +70,27 @@ public class PVbolt implements IRichBolt {
         try {
             logString = input.getString(0);
             endTime = System.currentTimeMillis();
+
             if (!StringUtils.isEmpty(logString)) {
-
-
                 session_id = logString.split("\t")[1];
             }
+
             if (session_id != null) {
                 pv++;
             }
 
             if (endTime - startTime >= 5000) {
+
                 if (lockData.equals(zooKeeper.getData(zk_path, false, null))) {
+
+                    //pv*2 是基于 excutor的并发数
                     System.err.println("threadId   " + Thread.currentThread().getId() + "   pv   =" + pv * 2);
                 }
                 startTime = System.currentTimeMillis();
             }
 
             collector.emit(new Values(Thread.currentThread().getId(), pv));
-            //pv*2 是基于 excutor的并发数
+
 
 
         } catch (Exception e) {
