@@ -17,6 +17,7 @@ public class PVbolt implements IRichBolt {
 
 
     private OutputCollector collector;
+    //在zookeeper主机上随便一个建/lock/storm目录
     private final String zk_path = "/lock/storm/pv";
     private ZooKeeper zooKeeper;
     private String lockData;
