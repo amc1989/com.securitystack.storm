@@ -56,7 +56,7 @@ public class PVbolt implements IRichBolt {
 
     //使用static关键词就能是数据对了
     //说明了storm的多线程是基于对象的，而不是基于方法的
-
+//gmfkgjld
     //    static long pv = 0;
     long pv = 0;
     long startTime = System.currentTimeMillis();
