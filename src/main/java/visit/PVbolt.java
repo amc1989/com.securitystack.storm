@@ -69,8 +69,9 @@ public class PVbolt implements IRichBolt {
 
         try {
             logString = input.getString(0);
+            endTime = System.currentTimeMillis();
             if (!StringUtils.isEmpty(logString)) {
-                endTime = System.currentTimeMillis();
+
 
                 session_id = logString.split("\t")[1];
             }
