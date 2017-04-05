@@ -1,6 +1,7 @@
 package visit;
 
 
+import org.apache.storm.shade.org.apache.commons.lang.StringUtils;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichBolt;
@@ -62,20 +63,24 @@ public class PVbolt implements IRichBolt {
     long pv = 0;
     long startTime = System.currentTimeMillis();
     long endTime = 0l;
+
     @Override
     public void execute(Tuple input) {
 
         try {
-            endTime = System.currentTimeMillis();
             logString = input.getString(0);
-            session_id = logString.split("\t")[1];
+            if (!StringUtils.isEmpty(logString)) {
+                endTime = System.currentTimeMillis();
+
+                session_id = logString.split("\t")[1];
+            }
             if (session_id != null) {
                 pv++;
             }
 
-            if(endTime-startTime>=5000){
+            if (endTime - startTime >= 5000) {
                 if (lockData.equals(zooKeeper.getData(zk_path, false, null))) {
-                    System.err.println("threadId   "+Thread.currentThread().getId() + "   pv   =" + pv * 2);
+                    System.err.println("threadId   " + Thread.currentThread().getId() + "   pv   =" + pv * 2);
                 }
                 startTime = System.currentTimeMillis();
             }
