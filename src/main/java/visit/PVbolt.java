@@ -1,7 +1,8 @@
 package visit;
 
 
-import org.apache.storm.shade.org.apache.commons.lang.StringUtils;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichBolt;
@@ -71,7 +72,7 @@ public class PVbolt implements IRichBolt {
             logString = input.getString(0);
             endTime = System.currentTimeMillis();
 
-            if (!StringUtils.isEmpty(logString)) {
+            if (StringUtils.isNoneBlank(logString)) {
                 session_id = logString.split("\t")[1];
             }
 
