@@ -31,7 +31,6 @@ public class DeepVisit implements IBasicBolt {
         Integer count = counts.get(dateStr+"_"+session_id);
          if(null==count){
              count = 0;
-
          }
          count++;
         counts.put(dateStr+"_"+session_id,count);
