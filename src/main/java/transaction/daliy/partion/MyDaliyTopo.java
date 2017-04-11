@@ -9,7 +9,7 @@ import transcation.MyTxSpout;
 public class MyDaliyTopo {
 
     public static void main(String[] args) {
-        TransactionalTopologyBuilder builder = new TransactionalTopologyBuilder("ttbid", "spoutid", new MyTxSpout(), 1);
+        TransactionalTopologyBuilder builder = new TransactionalTopologyBuilder("ttbid", "spoutid", new MyPtTxSpout(), 1);
         builder.setBolt("MyDaliyBatchBolt", new MyDaliyBatchBolt(), 3).shuffleGrouping("spoutid");
         builder.setCommitterBolt("MyCommiter", new MyDaliyCommiterBolt(), 1).shuffleGrouping("MyDaliyBatchBolt");
         Config conf = new Config();
