@@ -64,6 +64,7 @@ public class BasicDRPCTopology {
 
         for (String word : new String[]{ "hello", "goodbye" }) {
           System.out.println("Result for \"" + word + "\": " + drpc.execute("exclamation", word));
+
         }
 
         Thread.sleep(10000);
