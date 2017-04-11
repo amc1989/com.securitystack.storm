@@ -21,10 +21,11 @@ public class MyDaliyCommiterBolt extends BaseTransactionalBolt implements ICommi
     //代表数据库
     private static Map<String, DBValue> dbMap = new HashMap<String, DBValue>();
     private static final String GLOBAL_KEY = "GLOBAL_KEY";
-    private int sum;
     private TransactionAttempt id;
     private BatchOutputCollector collector;
     private Map<String, Integer> countMap = new HashMap<String, Integer>();
+    private String today;
+
     @Override
     public void prepare(Map conf, TopologyContext context, BatchOutputCollector collector, TransactionAttempt id) {
         this.id = id;
@@ -33,18 +34,17 @@ public class MyDaliyCommiterBolt extends BaseTransactionalBolt implements ICommi
 
     @Override
     public void execute(Tuple tuple) {
-        String today = tuple.getString(1);
+        today = tuple.getString(1);
         Integer count = tuple.getInteger(2);
         id = (TransactionAttempt) tuple.getValue(0);
         if (StringUtils.isNotBlank(today) && count != null) {
-                Integer batchCount =countMap.get(today);
-                if(null == batchCount){
-                    batchCount = 0;
-                }
+            Integer batchCount = countMap.get(today);
+            if (null == batchCount) {
+                batchCount = 0;
+            }
             batchCount += count;
-                countMap.put(today,batchCount);
+            countMap.put(today, batchCount);
         }
-        sum += tuple.getInteger(1);
     }
 
     //事务的每个tuple完成了就通知comiitter去提交整个batch   finishBatch提交
@@ -57,9 +57,9 @@ public class MyDaliyCommiterBolt extends BaseTransactionalBolt implements ICommi
             newDBValue = new DBValue();
             newDBValue.txid = id.getTransactionId();
             if (null == dbValue) {
-                newDBValue.count = sum;
+                newDBValue.count = countMap.get(today);
             } else {
-                newDBValue.count = sum + dbValue.count;
+                newDBValue.count = countMap.get(today) + dbValue.count;
             }
             dbMap.put(GLOBAL_KEY, newDBValue);
         } else {
