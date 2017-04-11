@@ -5,6 +5,7 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.transactional.TransactionAttempt;
 import org.apache.storm.transactional.partitioned.IPartitionedTransactionalSpout;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 import org.apache.storm.utils.Utils;
 import transcation.MyMeta;
@@ -42,17 +43,17 @@ public class MyPtTxSpout implements IPartitionedTransactionalSpout<MyMeta> {
 
     @Override
     public Coordinator getCoordinator(Map conf, TopologyContext context) {
-        return null;
+        return new MyCoordinator();
     }
 
     @Override
     public Emitter<MyMeta> getEmitter(Map conf, TopologyContext context) {
-        return null;
+        return new MyEmitter();
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-
+        declarer.declare(new Fields("tx","log"));
     }
 
     @Override
