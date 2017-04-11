@@ -24,7 +24,7 @@ public class MyDaliyCommiterBolt extends BaseTransactionalBolt implements ICommi
     private TransactionAttempt id;
     private BatchOutputCollector collector;
     private Map<String, Integer> countMap = new HashMap<String, Integer>();
-    private String today;
+    private String today ;
 
     @Override
     public void prepare(Map conf, TopologyContext context, BatchOutputCollector collector, TransactionAttempt id) {
@@ -58,7 +58,7 @@ public class MyDaliyCommiterBolt extends BaseTransactionalBolt implements ICommi
             newDBValue.txid = id.getTransactionId();
             newDBValue.dateStr = today;
             if (null == dbValue) {
-                newDBValue.count = countMap.get(today);
+                newDBValue.count = countMap.get("2014-01-07");
             } else {
                 newDBValue.count = countMap.get(today) + dbValue.count;
             }

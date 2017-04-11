@@ -50,6 +50,7 @@ public class MyDaliyBatchBolt implements IBatchBolt<TransactionAttempt> {
 //当一个batch处理完的时候，一起commit
     @Override
     public void finishBatch() {
+
         collector.emit(new Values(tx, today, count));
     }
 
