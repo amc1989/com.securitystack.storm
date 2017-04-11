@@ -104,13 +104,13 @@ public class MyPtTxSpout implements IPartitionedTransactionalSpout<MyMeta> {
         public void emitPartitionBatch(TransactionAttempt tx, BatchOutputCollector collector, int partition, MyMeta partitionMeta) {
             long beginPoint = partitionMeta.getBeginPoint();
             int num = partitionMeta.getNum();
-            Map<Long, String> dbMap = PT_DATA_MP.get(partition);
+            Map<Long, String> batchMap = PT_DATA_MP.get(partition);
             for (long i = beginPoint; i < num + beginPoint; i++) {
-                if (null == dbMap.get(i)) {
+                if (null == batchMap.get(i)) {
                     break;
                 }
-                collector.emit(new Values(tx, dbMap.get(i)));
-                System.err.println("TransactionAttempt  MyEmitter: " + tx.getTransactionId() + "value :" + dbMap.get(i));
+                collector.emit(new Values(tx, batchMap.get(i)));
+                System.err.println("TransactionAttempt  MyEmitter: " + tx.getTransactionId() + "value :" + batchMap.get(i));
             }
         }
 
