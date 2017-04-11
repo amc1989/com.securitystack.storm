@@ -56,6 +56,7 @@ public class MyDaliyCommiterBolt extends BaseTransactionalBolt implements ICommi
             //更新数据库
             newDBValue = new DBValue();
             newDBValue.txid = id.getTransactionId();
+            newDBValue.dateStr = today;
             if (null == dbValue) {
                 newDBValue.count = countMap.get(today);
             } else {
