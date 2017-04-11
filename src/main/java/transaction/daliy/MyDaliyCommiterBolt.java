@@ -50,23 +50,24 @@ public class MyDaliyCommiterBolt extends BaseTransactionalBolt implements ICommi
     //事务的每个tuple完成了就通知comiitter去提交整个batch   finishBatch提交
     @Override
     public void finishBatch() {
-        DBValue dbValue = dbMap.get(GLOBAL_KEY);
-        DBValue newDBValue;
-        if (null == dbValue || !id.getTransactionId().equals(dbValue.txid)) {
-            //更新数据库
-            newDBValue = new DBValue();
-            newDBValue.txid = id.getTransactionId();
-            newDBValue.dateStr = today;
-            if (null == dbValue) {
-                newDBValue.count = countMap.get("2014-01-07");
+        if(countMap.size()>0) {
+            DBValue dbValue = dbMap.get(GLOBAL_KEY);
+            DBValue newDBValue;
+            if (null == dbValue || !id.getTransactionId().equals(dbValue.txid)) {
+                //更新数据库
+                newDBValue = new DBValue();
+                newDBValue.txid = id.getTransactionId();
+                newDBValue.dateStr = today;
+                if (null == dbValue) {
+                    newDBValue.count = countMap.get("2014-01-07");
+                } else {
+                    newDBValue.count = countMap.get(today) + dbValue.count;
+                }
+                dbMap.put(GLOBAL_KEY, newDBValue);
             } else {
-                newDBValue.count = countMap.get(today) + dbValue.count;
+                newDBValue = dbValue;
             }
-            dbMap.put(GLOBAL_KEY, newDBValue);
-        } else {
-            newDBValue = dbValue;
         }
-
         System.err.println("total ===============:" + dbMap.get(GLOBAL_KEY).count);
         //        collector.emit(new Values(id.getTransactionId(), sum));
     }
