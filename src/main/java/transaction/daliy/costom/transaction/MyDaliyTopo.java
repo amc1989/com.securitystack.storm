@@ -1,11 +1,9 @@
-package transaction.daliy;
+package transaction.daliy.costom.transaction;
 
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.transactional.TransactionalTopologyBuilder;
-import transcation.MyCommiter;
-import transcation.MyTransactionBolt;
 import transcation.MyTxSpout;
 
 public class MyDaliyTopo {
