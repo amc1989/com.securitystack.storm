@@ -28,6 +28,7 @@ import org.apache.storm.trident.operation.BaseFunction;
 import org.apache.storm.trident.operation.TridentCollector;
 import org.apache.storm.trident.operation.builtin.Count;
 import org.apache.storm.trident.operation.builtin.FilterNull;
+import org.apache.storm.trident.operation.builtin.FirstN;
 import org.apache.storm.trident.operation.builtin.MapGet;
 import org.apache.storm.trident.testing.FixedBatchSpout;
 import org.apache.storm.trident.testing.MemoryMapState;
@@ -47,12 +48,13 @@ public class TridentPVTopo {
         Random random = new Random();
         String[] hosts = {"www.taobao.com"};
         String[] session_id = {"1", "2", "3", "4", "5", "6"};
-        String[] time = {"2014-01-07 08:40:50", "2014-01-07 08:40:51", "2014-01-07 08:40:52",
-                "2014-01-07 09:40:49", "2014-01-07 10:40:49", "2014-01-07 11:40:49", "2014-01-07 12:40:49"};
+        String[] time = {"2014-01-07 08:40:50", "2014-01-07 08:40:51", "2014-01-08 08:40:52",
+                "2014-01-07 09:40:49", "2014-01-07 10:40:49", "2014-01-08 11:40:49", "2014-01-09 12:40:49"};
 
 
         FixedBatchSpout spout = new FixedBatchSpout(
-                new Fields("eachlog"), 3, new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
+                new Fields("eachlog"), 3,
+                new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
                 new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
                 new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
                 new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
@@ -77,10 +79,12 @@ public class TridentPVTopo {
 //                .parallelismHint(16);
 
         topology.newDRPCStream("GetPV", drpc)
-                .each(new Fields("args"), new Split(), new Fields("word"))
-                .groupBy(new Fields("word"))
-                .stateQuery(wordCounts, new Fields("word"), new MapGet(), new Fields("count"))
-                .each(new Fields("count"), new FilterNull());
+                //args固定的不能换其他名称
+                .each(new Fields("args"), new Split(), new Fields("date"))
+                .groupBy(new Fields("date"))
+                .stateQuery(wordCounts, new Fields("date"), new MapGet(), new Fields("PV"))
+                .each(new Fields("PV"), new FilterNull())
+                .applyAssembly(new FirstN(3,"PV",true));
 //        .aggregate(new Fields("count"));
 //                .project(new Fields("word", "count"));
         return topology.build();
@@ -94,15 +98,15 @@ public class TridentPVTopo {
             try {
                 LocalDRPC drpc = new LocalDRPC();
                 LocalCluster cluster = new LocalCluster();
+
                 cluster.submitTopology("wordCounter", conf, buildTopology(drpc));
                 {
-                    for (int i = 0; i < 10; i++) {
-                        System.err.println("DRPC RESULT: " + drpc.execute("GetPV", "2014-01-07 2014-01-08"));
+                    for (int i = 0; i < 100; i++) {
+                        System.err.println("DRPC RESULT: " + drpc.execute("GetPV", "2014-01-07 2014-01-08 2014-01-09"));
                         Thread.sleep(1000);
                     }
                 }
             } catch (Exception e) {
-
             }
         } else {
             conf.setNumWorkers(3);
