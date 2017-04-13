@@ -1,20 +1,22 @@
-package transaction.daliy.costom.transaction;
+package transaction.daliy.Opaque;
 
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.transactional.TransactionalTopologyBuilder;
-import transcation.MyTxSpout;
+
+
 
 public class MyDaliyTopo {
 
     public static void main(String[] args) {
-        TransactionalTopologyBuilder builder = new TransactionalTopologyBuilder("ttbid", "spoutid", new MyTxSpout(), 1);
+        TransactionalTopologyBuilder builder = new TransactionalTopologyBuilder("ttbid", "spoutid", new MyOpaquePtTxSpout(), 1);
         builder.setBolt("MyDaliyBatchBolt", new MyDaliyBatchBolt(), 3).shuffleGrouping("spoutid");
         builder.setCommitterBolt("MyCommiter", new MyDaliyCommiterBolt(), 1).shuffleGrouping("MyDaliyBatchBolt");
         Config conf = new Config();
         conf.setDebug(true);
         conf.setNumWorkers(3);
+
         if (args.length > 0) {
 
             try {

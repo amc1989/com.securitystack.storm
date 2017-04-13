@@ -34,20 +34,14 @@ import org.apache.storm.trident.testing.MemoryMapState;
 import org.apache.storm.trident.tuple.TridentTuple;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
+import trident.function.MySplit;
+import trident.function.Split;
 
 import java.util.Random;
 
 
 public class TridentPVTopo {
-    public static class Split extends BaseFunction {
-        @Override
-        public void execute(TridentTuple tuple, TridentCollector collector) {
-            String sentence = tuple.getString(0);
-            for (String word : sentence.split(" ")) {
-                collector.emit(new Values(word));
-            }
-        }
-    }
+
 
     public static StormTopology buildTopology(LocalDRPC drpc) {
         Random random = new Random();
@@ -58,37 +52,52 @@ public class TridentPVTopo {
 
 
         FixedBatchSpout spout = new FixedBatchSpout(
-                new Fields("sentence"), 3, new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
+                new Fields("eachlog"), 3, new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
+                new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
+                new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
+                new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
+                new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
+                new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
+                new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
+                new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
                 new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
                 new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
                 new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]),
                 new Values(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)]));
-        spout.setCycle(true);
+
+        spout.setCycle(false);
 
 
         TridentTopology topology = new TridentTopology();
-        TridentState wordCounts = topology.newStream("spout1", spout).parallelismHint(16).each(new Fields("sentence"),
-                new Split(), new Fields("word")).groupBy(new Fields("word")).persistentAggregate(new MemoryMapState.Factory(),
-                new Count(), new Fields("count")).parallelismHint(16);
+        TridentState wordCounts = topology.newStream("spout1", spout)
+//                .parallelismHint(16)
+                .each(new Fields("eachlog"), new MySplit("\t"), new Fields("date","session_id"))
+                .groupBy(new Fields("date"))
+                .persistentAggregate(new MemoryMapState.Factory(), new Fields("session_id"),new Count(), new Fields("PV"));
+//                .parallelismHint(16);
 
-        topology.newDRPCStream("words", drpc).each(new Fields("args"), new Split(), new Fields("word"))
+        topology.newDRPCStream("GetPV", drpc)
+                .each(new Fields("args"), new Split(), new Fields("word"))
                 .groupBy(new Fields("word"))
                 .stateQuery(wordCounts, new Fields("word"), new MapGet(), new Fields("count"))
-                .each(new Fields("count"), new FilterNull())
-                .project(new Fields("word", "count"));
+                .each(new Fields("count"), new FilterNull());
+//        .aggregate(new Fields("count"));
+//                .project(new Fields("word", "count"));
         return topology.build();
     }
 
     public static void main(String[] args) throws Exception {
         Config conf = new Config();
-        conf.setMaxSpoutPending(20);
+        conf.setMaxSpoutPending(10);
+        conf.setDebug(false);
         if (args.length == 0) {
             try {
                 LocalDRPC drpc = new LocalDRPC();
                 LocalCluster cluster = new LocalCluster();
-                cluster.submitTopology("wordCounter", conf, buildTopology(drpc));){
-                    for (int i = 0; i < 100; i++) {
-                        System.out.println("DRPC RESULT: " + drpc.execute("words", "cat the dog jumped"));
+                cluster.submitTopology("wordCounter", conf, buildTopology(drpc));
+                {
+                    for (int i = 0; i < 10; i++) {
+                        System.err.println("DRPC RESULT: " + drpc.execute("GetPV", "2014-01-07 2014-01-08"));
                         Thread.sleep(1000);
                     }
                 }
