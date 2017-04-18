@@ -29,6 +29,7 @@ public class FmtLogBolt implements IBasicBolt{
     public void execute(Tuple input, BasicOutputCollector collector) {
         eachLog = input.getString(0);
         if(StringUtils.isNoneBlank(eachLog)){
+            System.err.println("FmtLogBolt     :"+eachLog);
             collector.emit(new Values(DateFmt.getCountDate(eachLog.split("\t")[2],DateFmt.date_short),eachLog.split("\t")[1]));
         }
 

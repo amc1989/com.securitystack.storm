@@ -12,10 +12,12 @@ import org.apache.storm.trident.operation.builtin.Count;
 import org.apache.storm.trident.operation.builtin.FilterNull;
 import org.apache.storm.trident.operation.builtin.FirstN;
 import org.apache.storm.trident.operation.builtin.MapGet;
+import org.apache.storm.trident.state.StateFactory;
 import org.apache.storm.trident.testing.FixedBatchSpout;
 import org.apache.storm.trident.testing.MemoryMapState;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
+import org.xml.sax.HandlerBase;
 import trident.function.MySplit;
 import trident.function.Split;
 
@@ -51,23 +53,21 @@ public class TridentPVTopo {
         spout.setCycle(false);
 
 
+
+        TridentConfig  config = new TridentConfig("hbase_talbe","rowkey");
+
+        StateFactory state  = HbaseAggregateState.transactional(config);
+
         TridentTopology topology = new TridentTopology();
         TridentState wordCounts = topology.newStream("spout1", spout)
 //                .parallelismHint(16)
-                .each(new Fields("eachlog"), new MySplit("\t"), new Fields("date","session_id"))
-                .groupBy(new Fields("date"))
-                .persistentAggregate(new MemoryMapState.Factory(), new Fields("session_id"),new Count(), new Fields("PV"));
+                .each(new Fields("eachlog"), new MySplit("\t"), new Fields("date","cf","pv_count","session_id"))
+                .project(new Fields("date","cf","pv_count"))
+                .groupBy(new Fields("date","cf","pv_count"))
+                .persistentAggregate(state, new Fields("session_id"),new Count(), new Fields("PV"));
 //                .parallelismHint(16);
 
-        topology.newDRPCStream("GetPV", drpc)
-                //args固定的不能换其他名称
-                .each(new Fields("args"), new Split(), new Fields("date"))
-                .groupBy(new Fields("date"))
-                .stateQuery(wordCounts, new Fields("date"), new MapGet(), new Fields("PV"))
-                .each(new Fields("PV"), new FilterNull())
-                .applyAssembly(new FirstN(3,"PV",true));
-//        .aggregate(new Fields("count"));
-//                .project(new Fields("word", "count"));
+
         return topology.build();
     }
 

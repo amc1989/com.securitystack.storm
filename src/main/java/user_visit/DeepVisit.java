@@ -33,7 +33,9 @@ public class DeepVisit implements IBasicBolt {
              count = 0;
          }
          count++;
+        System.err.println("DeepVisit       :"+dateStr+"_"+session_id +"   ,count  ："+count);
         counts.put(dateStr+"_"+session_id,count);
+
         collector.emit(new Values(dateStr+"_"+session_id,count));
     }
 

@@ -23,7 +23,7 @@ public class UVTopo {
 
 
 		Config conf = new Config();
-		conf.setDebug(true);
+		conf.setDebug(false);
 		conf.setNumWorkers(3);
 
 		if (args.length > 0) {

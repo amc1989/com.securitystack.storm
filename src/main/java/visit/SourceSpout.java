@@ -1,9 +1,11 @@
 package visit;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
 import java.util.LinkedList;
@@ -23,15 +25,16 @@ public class SourceSpout implements IRichSpout {
     @Override
     public void open(@SuppressWarnings("rawtypes") Map conf, TopologyContext context,
                      SpoutOutputCollector collector) {
+        this.collector = collector;
         Random random = new Random();
         String[] hosts = {"www.taobao.com"};
         String[] session_id = {"1", "2", "3", "4", "5", "6"};
-        String[] time = {"2014-01-07 08:40:50", "2014-01-07 08:40:51", "2014-01-07 08:40:52",
-                "2014-01-07 09:40:49", "2014-01-07 10:40:49", "2014-01-07 11:40:49", "2014-01-07 12:40:49"};
+        String[] time = {"2017-04-17 08:40:50", "2017-04-17 08:40:51", "2017-04-17 08:40:52",
+                "2017-04-17 09:40:49", "2017-04-17 10:40:49", "2017-04-17 11:40:49", "2017-04-17 12:40:49"};
 
 
         for (int i = 0; i < 50; i++) {
-            queue.add(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(8)] + "\n");
+            queue.add(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)] + "\n");
         }
 
     }
@@ -56,7 +59,10 @@ public class SourceSpout implements IRichSpout {
 
     @Override
     public void nextTuple() {
-        collector.emit(new Values(queue.poll()));
+
+
+                 collector.emit(new Values(queue.poll()));
+
 
     }
 
@@ -74,7 +80,7 @@ public class SourceSpout implements IRichSpout {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        // TODO Auto-generated method stub
+        declarer.declare(new Fields("log"));
 
     }
 

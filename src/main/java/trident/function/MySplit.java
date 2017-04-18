@@ -24,7 +24,7 @@ public class MySplit extends BaseFunction {
         String[] split = sentence.split(patton);
 
         if(split.length ==3){
-            collector.emit(new Values(DateFmt.getCountDate(split[2],DateFmt.date_short),split[1]));
+            collector.emit(new Values(DateFmt.getCountDate(split[2],DateFmt.date_short),"cf","pv_count",split[1]));
         }
     }
 }
