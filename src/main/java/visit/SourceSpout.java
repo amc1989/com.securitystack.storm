@@ -33,7 +33,7 @@ public class SourceSpout implements IRichSpout {
                 "2017-04-17 09:40:49", "2017-04-17 10:40:49", "2017-04-17 11:40:49", "2017-04-17 12:40:49"};
 
 
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 88; i++) {
             queue.add(hosts[0] + "\t" + session_id[random.nextInt(5)] + "\t" + time[random.nextInt(7)] + "\n");
         }
 

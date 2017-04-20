@@ -17,7 +17,7 @@ public class UVTopo {
 	public static void main(String[] args) {
 		TopologyBuilder builder = new TopologyBuilder();
 		builder.setSpout("spout", new SourceSpout(), 1) ;
-		builder.setBolt("FmtLogBolt", new FmtLogBolt(), 4).shuffleGrouping("spout");
+		builder.setBolt("FmtLogBolt", new FmtLogBolt(), 2).setNumTasks(4).shuffleGrouping("spout");
 		builder.setBolt("DeepVisit", new DeepVisit(), 4).fieldsGrouping("FmtLogBolt",new Fields("date","session_id"));
 		builder.setBolt("UVSumBolt", new UVSumBolt(), 1).shuffleGrouping("DeepVisit");
 

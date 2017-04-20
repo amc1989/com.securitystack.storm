@@ -19,7 +19,7 @@ public class FmtLogBolt implements IBasicBolt{
 
     private String eachLog;
 
-
+    private int count;
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
 
@@ -29,7 +29,9 @@ public class FmtLogBolt implements IBasicBolt{
     public void execute(Tuple input, BasicOutputCollector collector) {
         eachLog = input.getString(0);
         if(StringUtils.isNoneBlank(eachLog)){
-            System.err.println("FmtLogBolt     :"+eachLog);
+            /*System.err.println("FmtLogBolt     :"+eachLog);*/
+            count++;
+            System.err.println("FmtLogBolt thread ："+Thread.currentThread().getId() +"     ,    count     :"+count);
             collector.emit(new Values(DateFmt.getCountDate(eachLog.split("\t")[2],DateFmt.date_short),eachLog.split("\t")[1]));
         }
 
